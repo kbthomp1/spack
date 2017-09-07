@@ -49,7 +49,7 @@ def save_env():
         os.environ['BASH_FUNC_module()'] = old_bash_func
 
 
-def test_get_path_from_module(save_env):
+def test_get_paths_from_module(save_env):
     lines = ['prepend-path LD_LIBRARY_PATH /path/to/lib',
              'setenv MOD_DIR /path/to',
              'setenv LDFLAGS -Wl,-rpath/path/to/lib',
@@ -58,12 +58,12 @@ def test_get_path_from_module(save_env):
     for line in lines:
         module_func = '() { eval `echo ' + line + ' bash filler`\n}'
         os.environ['BASH_FUNC_module()'] = module_func
-        path = get_path_from_module('mod')
+        path = get_paths_from_module('mod')
 
         assert path == '/path/to'
 
     os.environ['BASH_FUNC_module()'] = '() { eval $(echo fill bash $*)\n}'
-    path = get_path_from_module('mod')
+    path = get_paths_from_module('mod')
 
     assert path is None
 

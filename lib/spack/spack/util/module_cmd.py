@@ -154,7 +154,7 @@ def get_argument_from_module_line(line):
         return line.split()[2]
 
 
-def get_path_from_module(mod):
+def get_paths_from_module(mod):
     """Inspects a TCL module for entries that indicate the absolute path
     at which the library supported by said module can be found.
     """
@@ -164,31 +164,38 @@ def get_path_from_module(mod):
     # Read the module
     text = modulecmd('show', mod, output=str, error=str).split('\n')
 
+    # Use set to store paths found, to prevent storing duplicates
+    paths = set()
+
     # If it sets the LD_LIBRARY_PATH or CRAY_LD_LIBRARY_PATH, use that
     for line in text:
         if line.find('LD_LIBRARY_PATH') >= 0:
             path = get_argument_from_module_line(line)
-            return path[:path.find('/lib')]
+            paths.add(path[:path.find('/lib')])
 
     # If it lists its package directory, return that
     for line in text:
         if line.find(mod.upper() + '_DIR') >= 0:
-            return get_argument_from_module_line(line)
+            paths.add(get_argument_from_module_line(line))
 
     # If it lists a -rpath instruction, use that
     for line in text:
         rpath = line.find('-rpath/')
         if rpath >= 0:
-            return line[rpath + 6:line.find('/lib')]
+            paths.add(line[rpath + 6:line.find('/lib')])
 
     # If it lists a -L instruction, use that
     for line in text:
         L = line.find('-L/')
         if L >= 0:
-            return line[L + 2:line.find('/lib')]
+            paths.add(line[L + 2:line.find('/lib')])
 
-    # Unable to find module path
-    return None
+    if paths:
+        # Return colon delimited string of paths
+        return ":".join(paths)
+    else:
+        # Unable to find module path
+        return None
 
 
 class ModuleError(Exception):

@@ -121,7 +121,7 @@ import spack.store
 import spack.util.spack_json as sjson
 import spack.util.spack_yaml as syaml
 
-from spack.util.module_cmd import get_path_from_module, load_module
+from spack.util.module_cmd import get_paths_from_module, load_module
 from spack.error import SpecError, UnsatisfiableSpecError
 from spack.provider_index import ProviderIndex
 from spack.util.crypto import prefix_bits
@@ -1908,7 +1908,7 @@ class Spec(object):
                 for mod in compiler.modules:
                     load_module(mod)
 
-                s.external_path = get_path_from_module(s.external_module)
+                s.external_path = get_paths_from_module(s.external_module)
 
         # Mark everything in the spec as concrete, as well.
         self._mark_concrete()

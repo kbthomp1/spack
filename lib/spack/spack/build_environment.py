@@ -69,7 +69,7 @@ import spack.store
 from spack.environment import EnvironmentModifications, validate
 from spack.util.environment import *
 from spack.util.executable import Executable
-from spack.util.module_cmd import load_module, get_path_from_module
+from spack.util.module_cmd import load_module, get_paths_from_module
 from spack.util.log_parse import *
 
 
@@ -397,10 +397,10 @@ def get_rpaths(pkg):
                   if os.path.isdir(d.prefix.lib))
     rpaths.extend(d.prefix.lib64 for d in deps
                   if os.path.isdir(d.prefix.lib64))
-    # Second module is our compiler mod name. We use that to get rpaths from
-    # module show output.
-    if pkg.compiler.modules and len(pkg.compiler.modules) > 1:
-        rpaths.append(get_path_from_module(pkg.compiler.modules[1]))
+    # Parse compiler modulefiles to determine paths to required compiler libraries
+    for mod in pkg.compiler.modules:
+        rpaths.append(get_paths_from_module(mod))
+
     return rpaths
 
 
